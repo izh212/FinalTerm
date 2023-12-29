@@ -1,25 +1,50 @@
-import logo from './logo.svg';
+import {useEffect, useState} from 'react';
 import './App.css';
+import { useDispatch} from 'react-redux';
+import { addEmoji } from './store/EmojiSlice';
+import { addCategory } from './store/CategorySlice';
+import Details from './components/Details';
 
 function App() {
+  const dispatch = useDispatch();
+  const [categories, setCategories] = useState([]);
+  const [Category, setCategory] = useState(null);
+
+  useEffect(() => {
+   async function getdata() {
+      const response = await fetch('https://emojihub.yurace.pro/api/all');
+      const data = await response.json();
+      dispatch(addEmoji(data));
+      data.map((emoji) => {
+        if (!categories?.includes(emoji.category)) {
+          setCategories([...categories, emoji.category]);
+        }
+        
+      });
+
+     
+   }
+   getdata();
+   });
+
+  function handleClick(category) {
+    dispatch(addCategory(category));
+    setCategory(category);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Categories</h1>
+      <ul>
+        {categories.map((category, index) => (
+          <li key={index} onClick={() => handleClick(category)}>{category}</li>
+        ))}
+      </ul>
+
+      {Category && <Details/>}
     </div>
   );
 }
-
 export default App;
+
+
